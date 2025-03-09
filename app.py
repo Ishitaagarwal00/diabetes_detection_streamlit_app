@@ -91,14 +91,6 @@ if prediction[0] == 0:
 else:
     st.write('The model predicts: Diabetes')
 
-st.subheader('Prediction Probability')
-st.write(f'Probability of No Diabetes: {prediction_proba[0][0]:.2%}')
-st.write(f'Probability of Diabetes: {prediction_proba[0][1]:.2%}')
-
-# Model performance
-st.subheader('Model Performance')
-y_pred = model.predict(X_test_scaled)
-st.write(f'Model Accuracy: {accuracy_score(y_test, y_pred):.2%}')
 
 # Feature importance
 st.subheader('Feature Importance')
