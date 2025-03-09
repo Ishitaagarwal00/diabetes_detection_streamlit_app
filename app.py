@@ -1,51 +1,51 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report
 
-st.markdown(
-    """
-    <style>
-    /* Hide upper-right menu (GitHub, settings, etc.) */
-    #MainMenu {visibility: hidden;}
-    header {visibility: hidden;}
-
-    /* Hide Streamlit footer */
-    footer {visibility: hidden;}
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
-# Set page config
+# Set page configuration at the top
 st.set_page_config(
     page_title="Diabetes Detection App",
     page_icon="🏥",
     layout="wide"
 )
 
-# Title
+# Hide Streamlit UI elements
+st.markdown(
+    """
+    <style>
+    #MainMenu {visibility: hidden;}
+    header {visibility: hidden;}
+    footer {visibility: hidden;}
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# Title and description
 st.title("Diabetes Detection App")
 st.write("This app predicts diabetes using various health metrics.")
 
-# Load data
+# Load dataset function
 @st.cache_data
 def load_data():
-    # Load the Pima Indians Diabetes Database
     columns = ['Pregnancies', 'Glucose', 'BloodPressure', 'SkinThickness', 
                'Insulin', 'BMI', 'DiabetesPedigreeFunction', 'Age', 'Outcome']
-    
-    data = pd.read_csv('https://raw.githubusercontent.com/jbrownlee/Datasets/master/pima-indians-diabetes.data.csv', 
-                       names=columns)
+    data = pd.read_csv(
+        'https://raw.githubusercontent.com/jbrownlee/Datasets/master/pima-indians-diabetes.data.csv', 
+        names=columns
+    )
     return data
 
-# Load and prepare data
+# Load the dataset
 data = load_data()
 
-# Sidebar for user input
+# Sidebar input
 st.sidebar.header('User Input Features')
 
 def user_input_features():
@@ -58,22 +58,23 @@ def user_input_features():
     diabetes_pedigree = st.sidebar.slider('Diabetes Pedigree Function', 0.078, 2.42, 0.3725)
     age = st.sidebar.slider('Age', 21, 81, 29)
     
-    data = {
-        'Pregnancies': pregnancies,
-        'Glucose': glucose,
-        'BloodPressure': blood_pressure,
-        'SkinThickness': skin_thickness,
-        'Insulin': insulin,
-        'BMI': bmi,
-        'DiabetesPedigreeFunction': diabetes_pedigree,
-        'Age': age
-    }
-    return pd.DataFrame(data, index=[0])
+    user_data = pd.DataFrame({
+        'Pregnancies': [pregnancies],
+        'Glucose': [glucose],
+        'BloodPressure': [blood_pressure],
+        'SkinThickness': [skin_thickness],
+        'Insulin': [insulin],
+        'BMI': [bmi],
+        'DiabetesPedigreeFunction': [diabetes_pedigree],
+        'Age': [age]
+    })
+    
+    return user_data
 
 # Get user input
 user_data = user_input_features()
 
-# Display user input
+# Show user input
 st.subheader('User Input Features')
 st.write(user_data)
 
@@ -96,21 +97,26 @@ model.fit(X_train_scaled, y_train)
 # Make prediction on user input
 user_data_scaled = scaler.transform(user_data)
 prediction = model.predict(user_data_scaled)
-prediction_proba = model.predict_proba(user_data_scaled)
 
-# Show prediction
-st.subheader('Prediction')
+# Show prediction result
+st.subheader('Prediction Result')
 if prediction[0] == 0:
-    st.write('The model predicts: No Diabetes')
+    st.success('The model predicts: No Diabetes')
 else:
-    st.write('The model predicts: Diabetes')
+    st.error('The model predicts: Diabetes')
 
-
-# Feature importance
+# Feature importance visualization
 st.subheader('Feature Importance')
 feature_importance = pd.DataFrame({
     'Feature': X.columns,
     'Importance': model.feature_importances_
 }).sort_values('Importance', ascending=False)
 
-st.bar_chart(feature_importance.set_index('Feature'))
+# Plot feature importance
+fig, ax = plt.subplots(figsize=(8, 5))
+sns.barplot(x=feature_importance['Importance'], y=feature_importance['Feature'], palette='coolwarm', ax=ax)
+ax.set_title('Feature Importance in Diabetes Prediction')
+
+# Show plot in Streamlit
+st.pyplot(fig)
+
