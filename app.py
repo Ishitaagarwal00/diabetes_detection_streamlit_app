@@ -6,6 +6,20 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report
 
+st.markdown(
+    """
+    <style>
+    /* Hide upper-right menu (GitHub, settings, etc.) */
+    #MainMenu {visibility: hidden;}
+    header {visibility: hidden;}
+
+    /* Hide Streamlit footer */
+    footer {visibility: hidden;}
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 # Set page config
 st.set_page_config(
     page_title="Diabetes Detection App",
